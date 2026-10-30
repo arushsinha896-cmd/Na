@@ -1,0 +1,28 @@
+import socket
+
+s = socket.socket()
+s.bind(('localhost', 12345))
+s.listen(1)
+
+print("Server waiting...")
+conn, addr = s.accept()
+
+msg = conn.recv(1024).decode()
+print("Received:", msg)
+
+conn.close()
+s.close()
+
+
+
+
+
+import socket
+
+s = socket.socket()
+s.connect(('localhost', 12345))
+
+msg = input("Enter message: ")
+s.send(msg.encode())
+
+s.close()
