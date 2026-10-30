@@ -1,0 +1,117 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+// Smallest r such that 2^r >= m + r + 1
+int parityBitsNeeded(int m) {
+    int r = 0;
+    while ((1 << r) < m + r + 1) r++;
+    return r;
+}
+
+bool isPowerOfTwo(int x) {
+    return (x & (x - 1)) == 0;
+}
+
+// Returns codeword as 1-indexed vector (index 0 unused)
+vector<int> encode(const string& data) {
+    int m = data.size();
+    int r = parityBitsNeeded(m);
+    int n = m + r;
+    vector<int> code(n + 1, 0);
+
+    // Place data bits in non-power-of-2 positions
+    int j = 0;
+    for (int i = 1; i <= n; i++) {
+        if (isPowerOfTwo(i)) continue;
+        code[i] = data[j++] - '0';
+    }
+
+    // Compute each parity bit (even parity)
+    for (int p = 0; p < r; p++) {
+        int pos = 1 << p;
+        int parity = 0;
+        for (int i = 1; i <= n; i++) {
+            if (i & pos) parity ^= code[i];
+        }
+        code[pos] = parity;
+    }
+    return code;
+}
+
+// Returns error position (0 if no error); corrects the codeword in place
+int detectAndCorrect(vector<int>& code) {
+    int n = code.size() - 1;
+    int r = 0;
+    while ((1 << r) <= n) r++;
+
+    int syndrome = 0;
+    for (int p = 0; p < r; p++) {
+        int pos = 1 << p;
+        int parity = 0;
+        for (int i = 1; i <= n; i++) {
+            if (i & pos) parity ^= code[i];
+        }
+        if (parity) syndrome |= pos;
+    }
+
+    if (syndrome != 0 && syndrome <= n) {
+        code[syndrome] ^= 1;
+    }
+    return syndrome;
+}
+
+string extractData(const vector<int>& code) {
+    string data;
+    for (int i = 1; i < (int)code.size(); i++) {
+        if (!isPowerOfTwo(i)) data += char('0' + code[i]);
+    }
+    return data;
+}
+
+void printCode(const vector<int>& code) {
+    for (int i = 1; i < (int)code.size(); i++) cout << code[i];
+    cout << "\n";
+}
+
+int main() {
+    string data;
+    cout << "Enter data bits (e.g. 1011): ";
+    cin >> data;
+
+    for (char c : data) {
+        if (c != '0' && c != '1') {
+            cout << "Invalid input. Use only 0 and 1.\n";
+            return 1;
+        }
+    }
+
+    vector<int> code = encode(data);
+    cout << "Encoded Hamming code : ";
+    printCode(code);
+
+    int n = code.size() - 1;
+    int errPos;
+    cout << "Enter error position to flip (1-" << n << ", 0 for no error): ";
+    cin >> errPos;
+
+    if (errPos >= 1 && errPos <= n) {
+        code[errPos] ^= 1;
+    }
+    cout << "Received code        : ";
+    printCode(code);
+
+    int syndrome = detectAndCorrect(code);
+    if (syndrome == 0) {
+        cout << "No error detected.\n";
+    } else {
+        cout << "Error detected at position " << syndrome << ". Corrected.\n";
+        cout << "Corrected code       : ";
+        printCode(code);
+    }
+
+    cout << "Decoded data         : " << extractData(code) << "\n";
+    return 0;
+}
