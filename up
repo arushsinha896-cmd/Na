@@ -1,0 +1,31 @@
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.bind(('localhost', 12345))
+
+print("Server waiting...")
+
+data, addr = s.recvfrom(1024)
+msg = data.decode()
+
+result = msg.upper()
+s.sendto(result.encode(), addr)
+
+s.close()
+
+
+
+
+
+
+import socket
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+msg = input("Enter a string: ")
+s.sendto(msg.encode(), ('localhost', 12345))
+
+data, addr = s.recvfrom(1024)
+print("Uppercase:", data.decode())
+
+s.close()
