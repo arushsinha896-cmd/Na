@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+int main()
+{
+    int n;
+    const int INF = 999;
+    cout << "Enter Number of Routers: ";
+    cin >> n;
+    vector<vector<int>> cost(n, vector<int>(n));
+
+    cout << "\nEnter the cost of matrix: \n";
+    cout << "Enter" << INF << "for no direct connection.\n";
+
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> cost[i][j];
+        }
+    }
+    vector<vector<int>> distance = cost;
+    vector<vector<int>> nextHop(n, vector<int>(n - 1));
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (i != j && cost[i][j] != INF)
+            {
+                nextHop[i][j] = j;
+            }
+        }
+    }
+    bool updated = true;
+
+    while (updated)
+    {
+        updated = false;
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                for (int k = 0; k < n; k++)
+                {
+                    if (cost[i][k] != INF && distance[k][j] != INF)
+                    {
+                        if (distance[i][j] > cost[i][k] + distance[k][j])
+                        {
+                            distance[i][j] = cost[i][k] + distance[k][j];
+                            nextHop[i][j] = k;
+                            updated = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        cout << "\nRouting Table for Router " << i + 1 << ":\n";
+        cout << "Destination\tNext Hop\tDistance\n";
+        for (int j = 0; j < n; j++)
+        {
+            cout << j + 1 << "\t\t";
+            if (i == j)
+            {
+                cout << "-\t\t0\n";
+            }
+            else if (distance[i][j] == INF)
+            {
+                cout << "-\t\tINF\n";
+            }
+            else
+            {
+                cout << nextHop[i][j] + 1 << "\t\t" << distance[i][j] << endl;
+            }
+        }
+    }
+}
