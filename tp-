@@ -1,0 +1,42 @@
+import socket
+
+s = socket.socket()
+s.bind(('localhost', 12345))
+s.listen(1)
+
+print("Server waiting...")
+c, addr = s.accept()
+
+a, op, b = c.recv(1024).decode().split()
+a, b = float(a), float(b)
+
+if op == '+':
+    result = a + b
+elif op == '-':
+    result = a - b
+elif op == '*':
+    result = a * b
+elif op == '/':
+    result = a / b if b != 0 else "Division by zero"
+
+c.send(str(result).encode())
+c.close()
+s.close()
+
+
+
+
+
+import socket
+
+s = socket.socket()
+s.connect(('localhost', 12345))
+
+a = input("Enter first number: ")
+op = input("Enter operator (+, -, *, /): ")
+b = input("Enter second number: ")
+
+s.send(f"{a} {op} {b}".encode())
+
+print("Result:", s.recv(1024).decode())
+s.close()
